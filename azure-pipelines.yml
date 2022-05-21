@@ -148,7 +148,7 @@ stages:
           
 
           - task: Docker@2
-            enabled: false
+            enabled: true
             condition: eq(variables['releaseVersion'], 'False')
             inputs:
               containerRegistry: 'SharedDocker-Service Mapper'
@@ -160,7 +160,7 @@ stages:
                 kotlin-$(version)
 
           - task: Docker@2
-            enabled: false
+            enabled: true
             condition: eq(variables['releaseVersion'], 'True')
             inputs:
               containerRegistry: 'DockerHub'
