@@ -8,6 +8,14 @@ plugins {
 
 group = "no.iktdev.cloud.gateway"
 version = "1.0-SNAPSHOT"
+base.archivesBaseName = "gateway"
+
+tasks {
+    bootJar {
+        archiveBaseName.set("gateway")
+    }
+}
+
 
 repositories {
     mavenCentral()
