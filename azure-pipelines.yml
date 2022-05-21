@@ -163,11 +163,10 @@ stages:
             enabled: false
             condition: eq(variables['releaseVersion'], 'True')
             inputs:
-              containerRegistry: 'SharedDocker-Service Mapper'
-              repository: 'bskjon/content-mapper'
+              containerRegistry: 'DockerHub'
+              repository: 'bskjon/cloud-gateway'
               command: 'buildAndPush'
               Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
               tags: | 
                 kotlin-$(version)
                 kotlin-latest
-        
