@@ -111,7 +111,7 @@ stages:
                 }
 
           - task: PowerShell@2
-            enabled: false
+            enabled: true
             displayName: Debug
             inputs:
               targetType: 'inline'
@@ -128,7 +128,7 @@ stages:
 
                 $file = "$(Build.SourcesDirectory)/package/$env:PACKAGENAME"
                 Write-Host "File " $file
-                Rename-Item -Path $(Build.SourcesDirectory)/package/$env:PACKAGENAME mapper.jar
+                Rename-Item -Path $(Build.SourcesDirectory)/package/$env:PACKAGENAME $(targetName).jar
           
           - task: PowerShell@2
             displayName: TestArray
@@ -148,11 +148,11 @@ stages:
           
 
           - task: Docker@2
-            enabled: false
+            enabled: true
             condition: eq(variables['releaseVersion'], 'False')
             inputs:
-              containerRegistry: 'SharedDocker-Service Mapper'
-              repository: 'bskjon/content-mapper'
+              containerRegistry: 'DockerHub'
+              repository: 'bskjon/cloud-gateway'
               command: 'buildAndPush'
               Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
               tags: |
@@ -160,14 +160,13 @@ stages:
                 kotlin-$(version)
 
           - task: Docker@2
-            enabled: false
+            enabled: true
             condition: eq(variables['releaseVersion'], 'True')
             inputs:
-              containerRegistry: 'SharedDocker-Service Mapper'
-              repository: 'bskjon/content-mapper'
+              containerRegistry: 'DockerHub'
+              repository: 'bskjon/cloud-gateway'
               command: 'buildAndPush'
               Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
               tags: | 
                 kotlin-$(version)
                 kotlin-latest
-        
