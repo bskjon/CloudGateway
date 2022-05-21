@@ -111,7 +111,7 @@ stages:
                 }
 
           - task: PowerShell@2
-            enabled: false
+            enabled: true
             displayName: Debug
             inputs:
               targetType: 'inline'
@@ -128,7 +128,7 @@ stages:
 
                 $file = "$(Build.SourcesDirectory)/package/$env:PACKAGENAME"
                 Write-Host "File " $file
-                Rename-Item -Path $(Build.SourcesDirectory)/package/$env:PACKAGENAME mapper.jar
+                Rename-Item -Path $(Build.SourcesDirectory)/package/$env:PACKAGENAME $($(targetName).jar)
           
           - task: PowerShell@2
             displayName: TestArray
