@@ -1,0 +1,155 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  - stage: Build
+    displayName: Build Mapper
+    jobs:
+      - job: Build
+        steps:                
+          - task: Gradle@2
+            displayName: Building Gateway
+            inputs:
+              workingDirectory: ''
+              gradleWrapperFile: 'gradlew'
+              gradleOptions: '-Xmx3072m'
+              jdkArchitectureOption: 'x64'
+              publishJUnitResults: true
+              testResultsFiles: '**/TEST-*.xml'
+              tasks: 'build'
+          
+          - task: PowerShell@2
+            name: Manage
+            displayName: Manage before artifacting
+            inputs:
+              targetType: 'inline'
+              script: |
+                $items = Get-ChildItem -Path $(Build.SourcesDirectory)/build/libs | Where-Object { $_.BaseName -match "plain" }
+                foreach ($item in $items)
+                {
+                  Remove-Item $item
+                }
+          - task: PowerShell@2
+            name: Details
+            displayName: Get Filename
+            inputs:
+              targetType: 'inline'
+              script: |
+                $text = Get-Content .\build.gradle.kts
+
+                $package = $( $text | Where-Object { $_ -match "^base.archivesBaseName =" }).Replace("base.archivesBaseName = ", "").Trim('"')
+                $version = $( $text | Where-Object { $_ -match "^version =" }).Replace("version = ", "").Trim('"')
+                $packageName = $($package + "-" + $version + ".jar")
+                Write-Host "##vso[task.setvariable variable=packageName;]$packageName"
+                Write-Host "##vso[task.setvariable variable=version;]$version"
+
+                [pscustomobject]@{ 
+                  version = $version
+                  packageName = $packageName 
+                  package = $package
+                } | ConvertTo-Json | Out-File -FilePath $(Build.SourcesDirectory)/build/libs/build.json
+
+          - task: PowerShell@2
+            enabled: false
+            displayName: Debug
+            inputs:
+              targetType: 'inline'
+              script: |
+                Write-Host "Env " $env:PACKAGENAME -ErrorAction Continue
+                Get-ChildItem Env:* | Select-Object -Property Name,Value
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: '$(Build.SourcesDirectory)/build/libs'
+              ArtifactName: 'package'
+              publishLocation: 'Container'
+
+
+
+  - stage: Docker
+    displayName: Build Docker image
+    jobs:
+      - job: Image
+        steps:
+          - task: DownloadBuildArtifacts@0
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'package'
+              downloadPath: '$(Build.SourcesDirectory)'
+
+          - task: PowerShell@2
+            displayName: Prepare data
+            inputs:
+              targetType: 'inline'
+              script: |
+                $build = Get-Content -Path $(Build.SourcesDirectory)/package/build.json | ConvertFrom-Json
+                Write-Host $build
+                $packageName = $build.packageName
+                $version = $build.version
+
+                Write-Host "Package Name => " $packageName
+                Write-Host "Version => " $version
+                
+                Write-Host "###vso[task.setvariable variable=packageName;]$packageName"
+                Write-Host "###vso[task.setvariable variable=version;]$version"
+
+                
+                if ($build.packageName -match "SNAPSHOT") {
+                  Write-Host "##vso[task.setvariable variable=releaseVersion;]$False"
+                } else {
+                  Write-Host "##vso[task.setvariable variable=releaseVersion;]$True"
+                }
+
+          - task: PowerShell@2
+            enabled: false
+            displayName: Debug
+            inputs:
+              targetType: 'inline'
+              script: |
+                Write-Host "Env " $env:PACKAGENAME -ErrorAction Continue
+                Get-ChildItem Env:* | Select-Object -Property Name,Value
+
+          - task: PowerShell@2
+            displayName: Align with imaging
+            inputs:
+              targetType: inline
+              script: |
+                Get-ChildItem -Path $(Build.SourcesDirectory)/package
+
+                $file = "$(Build.SourcesDirectory)/package/$env:PACKAGENAME"
+                Write-Host "File " $file
+                Rename-Item -Path $(Build.SourcesDirectory)/package/$env:PACKAGENAME gateway.jar
+                   
+          - task: Docker@2
+            enabled: false
+            condition: eq(variables['releaseVersion'], 'False')
+            inputs:
+              containerRegistry: 'SharedDocker-Content Processer'
+              repository: 'bskjon/content-processer'
+              command: 'buildAndPush'
+              Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
+              tags: |
+                kotlin-snapshot
+                kotlin-$(version)
+
+          - task: Docker@2
+            enabled: false
+            condition: eq(variables['releaseVersion'], 'True')
+            inputs:
+              containerRegistry: 'SharedDocker-Content Processer'
+              repository: 'bskjon/content-processer'
+              command: 'buildAndPush'
+              Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
+              tags: | 
+                kotlin-$(version)
+                kotlin-latest
+        
