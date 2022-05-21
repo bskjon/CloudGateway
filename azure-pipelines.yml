@@ -151,8 +151,8 @@ stages:
             enabled: true
             condition: eq(variables['releaseVersion'], 'False')
             inputs:
-              containerRegistry: 'SharedDocker-Service Mapper'
-              repository: 'bskjon/content-mapper'
+              containerRegistry: 'DockerHub'
+              repository: 'bskjon/cloud-gateway'
               command: 'buildAndPush'
               Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
               tags: |
