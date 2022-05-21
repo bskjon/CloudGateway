@@ -21,6 +21,8 @@ stages:
               workingDirectory: ''
               gradleWrapperFile: 'gradlew'
               gradleOptions: '-Xmx3072m'
+#              javaHomeOption: 'JDKVersion'
+#              jdkVersionOption: '1.8'
               jdkArchitectureOption: 'x64'
               publishJUnitResults: true
               testResultsFiles: '**/TEST-*.xml'
@@ -85,7 +87,6 @@ stages:
               downloadType: 'single'
               artifactName: 'package'
               downloadPath: '$(Build.SourcesDirectory)'
-
           - task: PowerShell@2
             displayName: Prepare data
             inputs:
@@ -127,14 +128,31 @@ stages:
 
                 $file = "$(Build.SourcesDirectory)/package/$env:PACKAGENAME"
                 Write-Host "File " $file
-                Rename-Item -Path $(Build.SourcesDirectory)/package/$env:PACKAGENAME gateway.jar
-                   
+                Rename-Item -Path $(Build.SourcesDirectory)/package/$env:PACKAGENAME mapper.jar
+          
+          - task: PowerShell@2
+            displayName: TestArray
+            condition: eq(variables['releaseVersion'], 'False')
+            inputs:
+              targetType: inline
+              script: |
+                Write-Host "Build variant " $env:RELEASEVERSION
+
+          - task: PowerShell@2
+            displayName: TestParameter
+            condition: eq(variables.releaseVersion, 'False')
+            inputs:
+              targetType: inline
+              script: |
+                Write-Host "Build variant " $env:RELEASEVERSION
+          
+
           - task: Docker@2
             enabled: false
             condition: eq(variables['releaseVersion'], 'False')
             inputs:
-              containerRegistry: 'SharedDocker-Content Processer'
-              repository: 'bskjon/content-processer'
+              containerRegistry: 'SharedDocker-Service Mapper'
+              repository: 'bskjon/content-mapper'
               command: 'buildAndPush'
               Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
               tags: |
@@ -145,8 +163,8 @@ stages:
             enabled: false
             condition: eq(variables['releaseVersion'], 'True')
             inputs:
-              containerRegistry: 'SharedDocker-Content Processer'
-              repository: 'bskjon/content-processer'
+              containerRegistry: 'SharedDocker-Service Mapper'
+              repository: 'bskjon/content-mapper'
               command: 'buildAndPush'
               Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
               tags: | 
