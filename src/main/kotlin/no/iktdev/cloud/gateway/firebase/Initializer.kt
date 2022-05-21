@@ -4,6 +4,7 @@ import com.google.auth.oauth2.GoogleCredentials
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
 import com.google.gson.Gson
+import no.iktdev.cloud.gateway.Log
 import no.iktdev.cloud.gateway.helpers.FileReader
 import org.jetbrains.annotations.NotNull
 import java.io.File
@@ -25,13 +26,14 @@ class Initializer {
             val options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.getApplicationDefault())
                 .build()
-
             app["default"] = FirebaseApp.initializeApp(options)
+            Log("FirebaseApp Instance: Loaded single-instance firebase app for all calls")
         } else {
             val appFile = File(System.getenv("FIREBASE_CREDENTIALS"))
             val jsonMap = FileReader().getText(appFile) ?: throw MultiTenantGoogleApplicationCredentialsReadException("Failed to read credentials file")
             readAndSetFirebaseCredentials(jsonMap)
         }
+        Log("FirebaseApp Instance: Completed Initialization")
     }
 
     private fun readAndSetFirebaseCredentials(jsonMap: String) {
@@ -41,6 +43,7 @@ class Initializer {
                 .createScoped()
             val options: FirebaseOptions = FirebaseOptions.builder().setCredentials(cred).build()
             app[it.key] = FirebaseApp.initializeApp(options)
+            Log("FirebaseApp Instance: Loaded up instance for: ${it.key}")
         }
     }
 
