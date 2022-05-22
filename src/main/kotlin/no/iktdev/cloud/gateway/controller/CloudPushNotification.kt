@@ -16,8 +16,13 @@ class CloudPushNotification {
 
     @PostMapping(path = ["/devices/send"], consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun sendDevicesFcm(@RequestBody data: FcmSendData) {
-        if (data.fmcTargets.isNotEmpty()) {
-            CloudMessage().send(data)
+        if (data.fcmTargets.isNotEmpty()) {
+            val result = CloudMessage().send(data)
+            if (result == data.fcmTargets.size) {
+                Log("All $result devices were successfully targeted by Firebase Cloud Messaging")
+            } else {
+                Log("$result devices failed to get targeted by Firebase Cloud Messaging")
+            }
         }
     }
 }

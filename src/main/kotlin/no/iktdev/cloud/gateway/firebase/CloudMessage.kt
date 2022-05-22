@@ -24,13 +24,13 @@ open class CloudMessage {
 
         val firebaseApp = Initializer().getAppInstance(data.appPackage)
 
-        return if (data.fmcTargets.size == 1) sendToSingle(
+        return if (data.fcmTargets.size == 1) sendToSingle(
             app = firebaseApp,
-            target = data.fmcTargets.first(),
+            target = data.fcmTargets.first(),
             payload = data.payload)
         else
             sendToMultiple(app = firebaseApp,
-                targets = data.fmcTargets,
+                targets = data.fcmTargets,
                 payload = data.payload
             )
     }
@@ -55,7 +55,7 @@ open class CloudMessage {
     }
 
     fun hasRequiredData(fcmSendData: FcmSendData): Boolean {
-        if (fcmSendData.fmcTargets.isEmpty()) return false
+        if (fcmSendData.fcmTargets.isEmpty()) return false
         if (fcmSendData.payload.isEmpty()) return false
         return true
     }

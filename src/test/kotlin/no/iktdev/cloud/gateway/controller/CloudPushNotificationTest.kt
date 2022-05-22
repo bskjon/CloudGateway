@@ -25,7 +25,7 @@ class CloudPushNotificationTest(
 
     @Test
     fun checkThatDeserializationIsCorrect() {
-        val data = FcmSendData("", fcmSenderToken = "nana", fmcTargets = listOf(), payload = mapOf(Pair("data", "nana batmaaaaan")))
+        val data = FcmSendData("", fcmSenderToken = "nana", fcmTargets = listOf(), payload = mapOf(Pair("data", "nana batmaaaaan")))
         val stringData = Gson().toJson(data)
 
         mockMvc.perform(post("/fcm/devices/send")
