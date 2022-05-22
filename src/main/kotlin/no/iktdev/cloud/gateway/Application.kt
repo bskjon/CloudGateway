@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.ApplicationContext
+import sun.reflect.Reflection
 import java.io.File
 import javax.annotation.PreDestroy
 
@@ -43,7 +44,7 @@ inline fun <reified T> log(message: String) {
 }
 
 fun Log(message: String) {
-	val caller: String = Thread.currentThread().stackTrace.first().javaClass.simpleName
+	val caller: String = Thread.currentThread().stackTrace[2].className ?: Thread.currentThread().stackTrace[2].methodName
 	LoggerFactory.getLogger(caller).info(message)
 }
 

@@ -17,11 +17,6 @@ class Heartbeat {
         return heartbeat()
     }
 
-    @GetMapping("/")
-    fun defaultPath(): Heartbeat
-    {
-        return heartbeat()
-    }
 
     @GetMapping("/swagger")
     fun swaggerRedirect(response: HttpServletResponse) {
