@@ -1,13 +1,10 @@
 package no.iktdev.cloud.gateway
 
-import kotlinx.coroutines.*
 import no.iktdev.cloud.gateway.firebase.Initializer
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.ApplicationContext
-import sun.reflect.Reflection
-import java.io.File
 import javax.annotation.PreDestroy
 
 
@@ -21,15 +18,6 @@ fun getContext(): ApplicationContext? {
 
 
 fun main(args: Array<String>) {
-	/*val application = SpringApplication(ProcessorApplication::class.java)
-	val props = Properties()
-	props.setProperty("spring.main.banner-mode", "log");
-	props.setProperty("logging.file", BaseConfiguration.logLocation.absolutePath);
-	props.setProperty("logging.pattern.console", "");
-	application.setDefaultProperties(props);
-
-	context = application.run(*args)*/
-
 	context = runApplication<Application>(*args)
 	Initializer()
 }
