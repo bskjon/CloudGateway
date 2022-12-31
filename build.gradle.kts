@@ -33,6 +33,7 @@ dependencies {
     testImplementation("junit:junit:4.13.1")
     testImplementation("org.mockito:mockito-core:3.+")
 
+    implementation("org.springdoc:springdoc-openapi-ui:1.6.14")
 
     implementation("com.google.firebase:firebase-admin:8.1.0")
 
